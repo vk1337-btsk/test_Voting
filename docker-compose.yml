@@ -1,0 +1,71 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_DB_PATH: /data/db.sqlite3
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      SITE_URL: http://localhost:8000
+    volumes:
+      - .:/app
+      - sqlite_data:/data
+      - ./media:/app/src/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    command: python manage.py runserver 0.0.0.0:8000
+
+  celery_worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_DB_PATH: /data/db.sqlite3
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    volumes:
+      - .:/app
+      - sqlite_data:/data
+      - ./media:/app/src/media
+    depends_on:
+      - redis
+      - web
+    entrypoint: []
+    command: celery -A config worker -l info
+
+  celery_beat:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_DB_PATH: /data/db.sqlite3
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    volumes:
+      - .:/app
+      - sqlite_data:/data
+      - ./media:/app/src/media
+    depends_on:
+      - redis
+      - web
+    entrypoint: []
+    command: celery -A config beat -l info
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    profiles: ["mailpit"]
+
+volumes:
+  sqlite_data:

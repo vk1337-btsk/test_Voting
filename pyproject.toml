@@ -1,0 +1,44 @@
+[project]
+name = "test-task-vote"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "celery>=5.6.3",
+    "django==6.1.*",
+    "django-filter>=26.2",
+    "djangorestframework>=3.18.1",
+    "drf-spectacular>=0.30.0",
+    "gunicorn>=26.2.0",
+    "openpyxl>=3.1.5",
+    "pillow>=12.3.0",
+    "python-dotenv>=1.2.4",
+    "redis>=8.1.0",
+    "django-stubs>=6.1.1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "pytest-django>=4.8", "factory-boy>=3.3", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+pythonpath = ["src"]
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+norecursedirs = [
+    ".venv",
+    ".git",
+    "media",
+    "staticfiles",
+    "node_modules",
+    "__pycache__"
+]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.django-stubs]
+django_settings_module = "config.settings"

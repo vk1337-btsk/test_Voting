@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        SYNC_ARGS: "--dev"
+
+  celery_worker:
+    build:
+      context: .
+      args:
+        SYNC_ARGS: "--dev"
+
+  tests:
+    build:
+      context: .
+      args:
+        SYNC_ARGS: "--dev"
+    command: pytest -v
+    volumes:
+      - .:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      CELERY_TASK_ALWAYS_EAGER: "1"
+    depends_on:
+      - redis
